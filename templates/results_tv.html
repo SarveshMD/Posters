@@ -1,0 +1,16 @@
+
+{% extends "layout.html" %}
+
+{% block title %}
+{{ search_query }} - Posters
+{% endblock %}
+
+{% block body %}
+    {% for result in results %}
+        <div class="card">
+            <h2>{{ result.get("original_name") }}</h2>
+            <p>{{ result["first_air_date"][:4] }}</p>
+            <p>{{ result["overview"] }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}

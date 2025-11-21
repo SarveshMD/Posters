@@ -6,10 +6,11 @@ Home
 
 {% block body %}
     <h1>Posters</h1>
-    <form action="/results" method="GET">
+    <form id="search" action="/results/film" method="GET">
         <input type="text" placeholder="Search" name="search_query">
-        <input type="checkbox" name="tv_show" id="tv_show">
+        <input type="checkbox" id="tv_show">
         <label for="tv_show">TV Show?</label>
         <button type="submit">Search</button>
     </form>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 {% endblock %}
