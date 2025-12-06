@@ -1,0 +1,16 @@
+.main-poster {
+    max-height: 420px;
+    object-fit: cover;
+}
+
+.poster-thumb {
+    height: 240px;
+    object-fit: cover;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.poster-thumb:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
