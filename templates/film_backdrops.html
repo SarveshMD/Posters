@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}Backdrops - {{ data.title }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='film_images.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div class="container my-5">
+
+    <a href="javascript:history.back()" class="btn btn-outline-secondary mb-4">← Back to Film</a>
+
+    <h1 class="mb-4">Backdrops for "{{ data.title }}"</h1>
+
+    <div class="row g-4">
+        {% for back in backdrops %}
+        <div class="col-12 col-md-6">
+            <img
+                src="https://image.tmdb.org/t/p/w780{{ back.file_path }}"
+                class="img-fluid rounded shadow backdrop-img"
+            >
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

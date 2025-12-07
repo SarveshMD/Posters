@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}Logos - {{ data.title }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='film_images.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div class="container my-5">
+
+    <a href="javascript:history.back()" class="btn btn-outline-secondary mb-4">← Back to Film</a>
+
+    <h1 class="mb-4">Logos for "{{ data.title }}"</h1>
+
+    <div class="row g-4">
+        {% for logo in logos %}
+        <div class="col-6 col-md-4 col-lg-3 d-flex justify-content-center">
+            <img
+                src="https://image.tmdb.org/t/p/w500{{ logo.file_path }}"
+                class="img-fluid logo-img"
+                style="max-height: 140px;"
+            >
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

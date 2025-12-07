@@ -1,0 +1,16 @@
+.poster-img {
+    width: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.poster-img:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+
+.backdrop-img {
+    border-radius: 10px;
+}
+
+.logo-img {
+    object-fit: contain;
+}
