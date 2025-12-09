@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='results_film.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -14,6 +14,13 @@
     <a href="javascript:history.back()" class="btn btn-outline-secondary mb-4">← Back to Search</a>
 
     <h1 class="mb-4">Results for "{{ search_query }}"</h1>
+
+    {% if not results %}
+        <div class="text-center text-muted py-5">
+            <h4>No films found.</h4>
+            <p>Try a different search query.</p>
+        </div>
+    {% endif %}
 
     <div class="row g-4">
         {% for result in results %}

@@ -1,16 +1,70 @@
-
 {% extends "layout.html" %}
 
 {% block title %}
-{{ search_query }} - Posters
+{{ search_query }} - TV Results
+{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
 {% endblock %}
 
 {% block body %}
-    {% for result in results %}
-        <div class="card">
-            <h2>{{ result.get("original_name") }}</h2>
-            <p>{{ result["first_air_date"][:4] }}</p>
-            <p>{{ result["overview"] }}</p>
+
+<div class="container mt-4">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary mb-4">← Back to Search</a>
+
+    <h1 class="mb-4">TV Results for "{{ search_query }}"</h1>
+
+    {% if not results %}
+        <div class="text-center text-muted py-5">
+            <h4>No TV shows found.</h4>
+            <p>Try a different search query.</p>
         </div>
-    {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        {% for result in results %}
+        <div class="col-6 col-md-4 col-lg-3">
+
+            <a href="/tv/{{ result.id }}" class="text-decoration-none">
+
+                <div class="card h-100 shadow-sm result-card">
+
+                    {% if result.poster_path %}
+                        <img src="https://image.tmdb.org/t/p/w300{{ result.poster_path }}"
+                             class="card-img-top poster-result-img"
+                             alt="{{ result.name }}">
+                    {% else %}
+                        <div class="placeholder bg-secondary text-white d-flex align-items-center justify-content-center"
+                             style="height: 450px;">
+                            No Image
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h5 class="card-title text-dark">
+                            {{ result.name }}
+                        </h5>
+
+                        <p class="text-muted mb-1">
+                            {% if result.first_air_date %}
+                                {{ result.first_air_date[:4] }}
+                            {% endif %}
+                        </p>
+
+                        <p class="card-text text-dark" style="font-size: 0.9rem;">
+                            {{ result.overview[:120] }}...
+                        </p>
+                    </div>
+
+                </div>
+
+            </a>
+
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
 {% endblock %}

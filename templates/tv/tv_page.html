@@ -1,29 +1,28 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{{ data.title }} - Details
+{{ data.name }} - Details
 {% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='page.css') }}">
-{% endblock %}
+{%endblock %}
 
 {% block body %}
 <div class="container my-5">
 
-    <!-- Back button -->
     <a href="javascript:history.back()" class="btn btn-outline-secondary mb-4">
         ← Back
     </a>
 
     <div class="row g-4">
 
-        <!-- Poster (smaller now) -->
+        <!-- Poster -->
         <div class="col-12 col-md-4 d-flex justify-content-center">
             {% if data.poster_path %}
             <img
                 src="https://image.tmdb.org/t/p/w500{{ data.poster_path }}"
-                alt="{{ data.title }}"
+                alt="{{ data.name }}"
                 class="img-fluid rounded shadow main-poster"
             >
             {% else %}
@@ -34,13 +33,14 @@
             {% endif %}
         </div>
 
-        <!-- Movie Info -->
+        <!-- TV Info -->
         <div class="col-12 col-md-8">
-            <h1 class="fw-bold">{{ data.title }}</h1>
+            <h1 class="fw-bold">{{ data.name }}</h1>
 
             <p class="text-muted mb-1">
-                {{ data.release_date[:4] }}
-                {% if data.runtime %} • {{ data.runtime }} min{% endif %}
+                {{ data.first_air_date[:4] if data.first_air_date }}
+                {% if data.number_of_seasons %} • {{ data.number_of_seasons }} season{% if data.number_of_seasons != 1 %}s{% endif %}{% endif %}
+                {% if data.number_of_episodes %} • {{ data.number_of_episodes }} episodes{% endif %}
             </p>
 
             <p class="mb-3">
@@ -74,34 +74,32 @@
     {% if posters %}
     <div class="d-flex justify-content-between align-items-center mt-5 mb-3">
         <h3 class="mb-0">Posters</h3>
-        <a href="/film/{{ data.id }}/posters" class="text-decoration-none">View all →</a>
+        <a href="/tv/{{ data.id }}/posters" class="text-decoration-none">View all →</a>
     </div>
 
     <div class="d-flex overflow-auto gap-3 pb-2" style="white-space: nowrap;">
-        {% for poster in posters[:12] %}  {# show first 12 only #}
+        {% for poster in posters[:12] %}
         <div style="display: inline-block;">
             <img
                 src="https://image.tmdb.org/t/p/w300{{ poster.file_path }}"
                 class="rounded shadow-sm poster-thumb"
-                alt="Poster"
             >
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Backdrops and Logos (no preview, only links) -->
+    <!-- Other Image Categories (links only) -->
     <div class="mt-5">
         <h4>More Images</h4>
-
         <ul class="list-unstyled mt-3">
             <li class="mb-2">
-                <a href="/film/{{ data.id }}/backdrops" class="text-decoration-none">
+                <a href="/tv/{{ data.id }}/backdrops" class="text-decoration-none">
                     → View all backdrops
                 </a>
             </li>
             <li class="mb-2">
-                <a href="/film/{{ data.id }}/logos" class="text-decoration-none">
+                <a href="/tv/{{ data.id }}/logos" class="text-decoration-none">
                     → View all logos
                 </a>
             </li>

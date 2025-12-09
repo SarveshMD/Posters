@@ -1,18 +1,17 @@
 {% extends "layout.html" %}
 
-{% block title %}Logos - {{ data.title }}{% endblock %}
+{% block title %}Logos - {{ data.name }}{% endblock %}
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='images.css') }}">
 {% endblock %}
 
 {% block body %}
-
 <div class="container my-5">
 
-    <a href="javascript:history.back()" class="btn btn-outline-secondary mb-4">← Back to Film</a>
+    <a href="/tv/{{ data.id }}" class="btn btn-outline-secondary mb-4">← Back to Show</a>
 
-    <h1 class="mb-4">Logos for "{{ data.title }}"</h1>
+    <h1 class="mb-4">Logos for "{{ data.name }}"</h1>
 
     <div class="row g-4">
         {% for logo in logos %}
