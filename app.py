@@ -34,7 +34,36 @@ def results_film():
 
     response = requests.get(film_search_endpoint, headers=headers, params=search_params)
     results = response.json()['results']
-    return render_template("results_film.html", search_query=search_query, results=results)
+    return render_template("film/results_film.html", search_query=search_query, results=results)
+
+@app.route("/film/<id>")
+def film_page(id):
+    data = fetch_film(id)
+    images = fetch_images(id)
+    return render_template("film/film_page.html", data=data, posters=images['posters'])
+
+
+@app.route("/film/<id>/posters")
+def film_posters(id):
+    data = fetch_film(id)
+    images = fetch_images(id)
+
+    return render_template("film/film_posters.html", data=data, posters=images['posters'])
+
+@app.route("/film/<id>/backdrops")
+def film_backdrops(id):
+    data = fetch_film(id)
+    images = fetch_images(id)
+
+    return render_template("film/film_backdrops.html", data=data, backdrops=images['backdrops'])
+
+
+@app.route("/film/<id>/logos")
+def film_logos(id):
+    data = fetch_film(id)
+    images = fetch_images(id)
+
+    return render_template("film/film_logos.html", data=data, logos=images['logos'])
 
 @app.route("/results/tv")
 def results_tv():
@@ -47,37 +76,6 @@ def results_tv():
     results = response.json()['results']
     return render_template("results_tv.html", search_query=search_query, results=results)
 
-@app.route("/film/<id>")
-def film_page(id):
-    data = fetch_film(id)
-    images = fetch_images(id)
-    return render_template("film_page.html", data=data, posters=images['posters'])
-
-
-@app.route("/film/<id>/posters")
-def film_posters(id):
-    data = fetch_film(id)
-    images = fetch_images(id)
-
-    return render_template("film_posters.html", data=data, posters=images['posters'])
-# → full_posters.html
-
-@app.route("/film/<id>/backdrops")
-def film_backdrops(id):
-    data = fetch_film(id)
-    images = fetch_images(id)
-
-    return render_template("film_backdrops.html", data=data, backdrops=images['backdrops'])
-# → full_backdrops.html
-
-
-@app.route("/film/<id>/logos")
-def film_logos(id):
-    data = fetch_film(id)
-    images = fetch_images(id)
-
-    return render_template("film_logos.html", data=data, logos=images['logos'])
-# → full_logos.html
 
 if __name__ == "__main__":
     app.run(port=1989, debug=True)
