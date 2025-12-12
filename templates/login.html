@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+
+  <div class="card shadow p-4" style="width: 100%; max-width: 420px;">
+
+    <h2 class="text-center mb-4">Login</h2>
+
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form action="/login" method="POST">
+
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input
+          type="email"
+          name="email"
+          class="form-control"
+          placeholder="Enter your email"
+          required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input
+          type="password"
+          name="password"
+          class="form-control"
+          placeholder="Enter your password"
+          required>
+      </div>
+
+      <button class="btn btn-primary w-100 mt-2">Login</button>
+
+      <div class="text-center mt-3">
+        <a href="/register" class="text-decoration-none">Don't have an account?</a>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+{% endblock %}
