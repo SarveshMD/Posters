@@ -4,7 +4,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from flask_sqlalchemy import SQLAlchemy
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -36,11 +36,28 @@ def create_robust_session():
 tmdb_client = create_robust_session()
 
 app = Flask(__name__)
-app.secret_key = "COFFEE_PLUS_COCOA"
+app.secret_key = os.getenv("SECRET_KEY", "fallback_key")
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+db_host = os.getenv("DB_HOST", "localhost")
+db_pass = os.getenv("DB_PASS", "fallback_pass")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+class SearchLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    logged_in = db.Column(db.Boolean, nullable=False)
+    search_query = db.Column(db.String(100), nullable=False)
+    film_or_tv = db.Column(db.String(10), nullable=False)
+    number_of_results = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f"<{self.id}, {self.logged_in}, {self.search_query}, {self.film_or_tv}, {self.number_of_results}>"
 
 class User(UserMixin):
     def __init__(self, id, email, password_hash):
@@ -48,8 +65,8 @@ class User(UserMixin):
         self.email = email
         self.password_hash = password_hash
 
-    def __str__(self):
-        return f"('{self.id}, {self.email}, {self.password_hash})"
+    def __repr__(self):
+        return f"<'{self.id}, {self.email}, {self.password_hash}>"
 
 temp_users = {}
 test_user = User(id=1, email="johndoe@example.com", password_hash=generate_password_hash("pass"))
@@ -67,6 +84,13 @@ def fetch_tmdb(endpoint, params=None):
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/search_history")
+def search_history():
+    all_logs = SearchLog.query.all()
+    for log in all_logs:
+        print(log)
+    return redirect("/")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -88,7 +112,7 @@ def login():
         return render_template("login.html", error="Incorrect email or password")
 
     login_user(user)
-    print((email, password))
+    print(user)
     return redirect("/")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -106,9 +130,8 @@ def register():
     user = User(len(temp_users) + 1, email, generate_password_hash(password))
     temp_users[user.email] = user
     login_user(user)
-    print((email, password))
-    for user in temp_users:
-        print(temp_users[user])
+    print(user)
+    print(temp_users)
     return redirect("/")
 
 @app.route("/logout")
@@ -125,6 +148,9 @@ def results_film():
 
     response = tmdb_client.get(film_search_endpoint, params=search_params)
     results = response.json()['results']
+    new_searchlog = SearchLog(logged_in=current_user.is_authenticated, search_query=search_query, film_or_tv="film", number_of_results=len(results))
+    db.session.add(new_searchlog)
+    db.session.commit()
     return render_template("film/results_film.html", search_query=search_query, results=results)
 
 @app.route("/film/<id>")
@@ -165,6 +191,9 @@ def results_tv():
 
     response = tmdb_client.get(tv_search_endpont, params=search_params)
     results = response.json()['results']
+    new_searchlog = SearchLog(logged_in=current_user.is_authenticated, search_query=search_query, film_or_tv="tv_show", number_of_results=len(results))
+    db.session.add(new_searchlog)
+    db.session.commit()
     return render_template("tv/results_tv.html", search_query=search_query, results=results)
 
 @app.route("/tv/<id>")
@@ -196,6 +225,8 @@ def tv_logos(id):
 
     return render_template("tv/tv_logos.html", data=data, logos=images['logos'])
 
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
-    app.run(port=1989, debug=True)
+    app.run(host='0.0.0.0', port=1989, debug=True)

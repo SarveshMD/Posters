@@ -1,0 +1,41 @@
+services:
+  # Service 1: Your Flask App
+  web:
+    build: .
+    ports:
+      - "1989:1989"  # Map container port 1989 to your laptop port 1989
+    environment:
+      - TMDB_API_KEY=${TMDB_API_KEY}  # Pass keys from your .env file
+      - SECRET_KEY=${SECRET_KEY}
+      # CRITICAL CHANGE: The host is now 'db', not 'localhost'
+      - DB_HOST=db  # <--- WE define this manually!
+      - DATABASE_URL=postgresql://postgres:chocochipcookie@db:5432/tmdb_app
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - db
+    networks:
+      - default
+    volumes:
+      - .:/app
+
+  # Service 2: The Database
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: chocochipcookie
+      POSTGRES_DB: tmdb_app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data even if container dies
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450

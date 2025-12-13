@@ -1,0 +1,13 @@
+# Ignore the virtual environment (CRITICAL: Windows venv breaks Linux containers)
+env/
+venv/
+__pycache__/
+
+# Ignore secrets
+.env
+.git
+.gitignore
+
+# Ignore docker junk
+Dockerfile
+docker-compose.yml
