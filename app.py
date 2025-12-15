@@ -49,28 +49,32 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    # username = db.Columnn(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    def __repr__(self):
+        return f"<'{self.id}, {self.email}, {self.password_hash}, {self.created_at}>"
+
+
 class SearchLog(db.Model):
+    __tablename__ = "search_logs"
     id = db.Column(db.Integer, primary_key=True)
     logged_in = db.Column(db.Boolean, nullable=False)
     search_query = db.Column(db.String(100), nullable=False)
     film_or_tv = db.Column(db.String(10), nullable=False)
     number_of_results = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+
+    user = db.relationship("User", backref="search_logs")
 
     def __repr__(self):
-        return f"<{self.id}, {self.logged_in}, {self.search_query}, {self.film_or_tv}, {self.number_of_results}>"
-
-class User(UserMixin):
-    def __init__(self, id, email, password_hash):
-        self.id = id
-        self.email = email
-        self.password_hash = password_hash
-
-    def __repr__(self):
-        return f"<'{self.id}, {self.email}, {self.password_hash}>"
-
-temp_users = {}
-test_user = User(id=1, email="johndoe@example.com", password_hash=generate_password_hash("pass"))
-temp_users[test_user.email] = test_user
+        return f"<{self.id}, {self.logged_in}, {self.search_query}, {self.film_or_tv}, {self.number_of_results}, {self.user.email if self.user else 'Guest'}>"
 
 film_endpoint = "https://api.themoviedb.org/3/movie"
 tv_endpoint = "https://api.themoviedb.org/3/tv"
@@ -85,6 +89,7 @@ def fetch_tmdb(endpoint, params=None):
 def index():
     return render_template("index.html")
 
+## vvvvvvv REMOVE THESE ROUTES
 @app.route("/search_history")
 def search_history():
     all_logs = SearchLog.query.all()
@@ -92,12 +97,17 @@ def search_history():
         print(log)
     return redirect("/")
 
+@app.route("/users")
+def users():
+    all_users = User.query.all()
+    for user in all_users:
+        print(user)
+    return redirect("/")
+## ^^^^^^ REMOVE THESE ROUTES
+
 @login_manager.user_loader
 def load_user(user_id):
-    for u in temp_users.values():
-        if str(u.id) == str(user_id):
-            return u
-    return None
+    return User.query.get(int(user_id))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -106,7 +116,7 @@ def login():
 
     email = request.form.get("email")
     password = request.form.get("password")
-    user = temp_users.get(email)
+    user = User.query.filter_by(email=email).first()
 
     if not user or not check_password_hash(user.password_hash, password):
         return render_template("login.html", error="Incorrect email or password")
@@ -127,11 +137,14 @@ def register():
     if password != confirm:
         return render_template("register.html", error="Passwords do not match")
 
-    user = User(len(temp_users) + 1, email, generate_password_hash(password))
-    temp_users[user.email] = user
+    duplicate = User.query.filter_by(email=email).first()
+    if duplicate:
+        return render_template("register.html", error="Email already registered")
+
+    user = User(email=email, password_hash=generate_password_hash(password))
+    db.session.add(user)
+    db.session.commit()
     login_user(user)
-    print(user)
-    print(temp_users)
     return redirect("/")
 
 @app.route("/logout")
@@ -148,7 +161,11 @@ def results_film():
 
     response = tmdb_client.get(film_search_endpoint, params=search_params)
     results = response.json()['results']
-    new_searchlog = SearchLog(logged_in=current_user.is_authenticated, search_query=search_query, film_or_tv="film", number_of_results=len(results))
+    new_searchlog = SearchLog(logged_in=current_user.is_authenticated,
+        search_query=search_query,
+        film_or_tv="film",
+        number_of_results=len(results),
+        user=(current_user if current_user.is_authenticated else None))
     db.session.add(new_searchlog)
     db.session.commit()
     return render_template("film/results_film.html", search_query=search_query, results=results)
@@ -191,7 +208,11 @@ def results_tv():
 
     response = tmdb_client.get(tv_search_endpont, params=search_params)
     results = response.json()['results']
-    new_searchlog = SearchLog(logged_in=current_user.is_authenticated, search_query=search_query, film_or_tv="tv_show", number_of_results=len(results))
+    new_searchlog = SearchLog(logged_in=current_user.is_authenticated,
+        search_query=search_query,
+        film_or_tv="tv_show",
+        number_of_results=len(results),
+        user=(current_user if current_user.is_authenticated else None))
     db.session.add(new_searchlog)
     db.session.commit()
     return render_template("tv/results_tv.html", search_query=search_query, results=results)
