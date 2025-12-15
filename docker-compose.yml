@@ -9,7 +9,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       # CRITICAL CHANGE: The host is now 'db', not 'localhost'
       - DB_HOST=db  # <--- WE define this manually!
-      - DATABASE_URL=postgresql://postgres:chocochipcookie@db:5432/tmdb_app
+      - DATABASE_URL=postgresql://postgres:${DB_PASS}@db:5432/tmdb_app
       - PYTHONUNBUFFERED=1
     depends_on:
       - db
@@ -24,7 +24,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: chocochipcookie
+      POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: tmdb_app
     volumes:
       - postgres_data:/var/lib/postgresql/data # Persist data even if container dies
